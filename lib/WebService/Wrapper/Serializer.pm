@@ -18,7 +18,6 @@ WebService::Wrapper::Serializer
 
 use Modern::Perl;
 use Data::Dumper;
-use Acme::Curse qw/curse/;
 use Module::Pluggable   search_path => 'WebService::Wrapper::Serializer',
                         require     => 1;
 
@@ -37,7 +36,7 @@ our $AUTOLOAD;
 sub AUTOLOAD {
     my ($self, $data) = @_;
     my $name = $AUTOLOAD =~ s/.*://r;
-    $plugins{$name}->{dump}->($$self[0], curse $data) if exists $plugins{$name}
+    $plugins{$name}->{dump}->($$self[0], $data) if exists $plugins{$name}
 }
 
 sub load_results {

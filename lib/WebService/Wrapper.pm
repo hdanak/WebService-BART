@@ -6,6 +6,8 @@ use LWP::UserAgent;
 use URI::WithBase;
 use WebService::Wrapper::Serializer;
 
+use Data::Dumper;
+
 =head1 NAME
 
 WebService::Wrapper
@@ -46,11 +48,19 @@ sub _get {
 sub _create_method {
     my ($self, $specs) = @_;
     sub {
-        my ($self, %extra_params) = @_;
+        my ($self, %user_params) = @_;
         my ($path, $params) = @$specs;
-        $self->_get($path, { (map {
-            ref($$params{$_}) ? () : ($_ => $$params{$_})
-        } keys %$params), %extra_params })
+        $self->_get($path, { map {
+            (ref($$params{$_}) ne 'ARRAY') ? (
+                $_ => $$params{$_}
+            ) : do { # TODO: Add a filter mechanism for after validating
+                my ($label, $validator, $default) = @{$$params{$_}};
+                (exists $user_params{$label}) ? (
+                    ($user_params{$label} ~~ $validator)
+                        ? ($_ => $user_params{$label}) : ()
+                ) : ( defined($default) ? ($_ => $default) : () )
+            }
+        } keys %$params })
     }
 }
 

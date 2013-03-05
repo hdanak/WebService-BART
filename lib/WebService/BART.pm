@@ -17,8 +17,8 @@ WebService::BART
 
 
 my %validate = (
-    station => sub { lc =~ /[a-z0-9]{4}/ ? lc : 'all' },
-    date    => sub { lc =~ m(^ \d\d/\d\d/\d{4}|today|now $)x ? lc : () }
+    station => sub { $_[0] ~~ /[a-z0-9]{4}/i },
+    date    => sub { $_[0] ~~ m(^\d\d/\d\d/\d{4}|today|now$)i },
 );
 sub url { "http://api.bart.gov/api/" };
 sub methods {
@@ -30,13 +30,13 @@ sub methods {
     }],
     route       => [ 'route.aspx' => {
         cmd   => 'routeinfo',
-        route => [ route_num  => [1..12], 'all' ],
-        sched => [ sched_num  => qr/^\d+$/ ],
+        route => [ route      => [1..12], 'all' ],
+        sched => [ schedule   => qr/^\d+$/ ],
         date  => [ date       => $validate{date} ],
     }],
     routes      => [ 'route.aspx' => {
         cmd   => 'routes',
-        sched => [ sched_num  => qr/^\d+$/ ],
+        sched => [ schedule   => qr/^\d+$/ ],
         date  => [ date       => $validate{date} ],
     }],
     delays      => [ 'bsa.aspx' => {
