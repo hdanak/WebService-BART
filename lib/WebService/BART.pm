@@ -1,6 +1,8 @@
-
 package WebService::BART;
+use parent qw| WebService::Wrapper |;
 our $VERSION = '0.01';
+
+use Modern::Perl;
 
 =head1 NAME
 
@@ -13,9 +15,6 @@ WebService::BART
 
 =cut
 
-use Modern::Perl;
-
-use parent qw( WebService::Wrapper );
 
 my %validate = (
     station => sub { lc =~ /[a-z0-9]{4}/ ? lc : 'all' },
@@ -73,7 +72,7 @@ our $METHODS  = {
 
 =head1 METHODS
 
-=head2 BART::API->new(
+=head2 WebService::BART->new(
     key => I<$API_key>
 )
 
@@ -89,20 +88,21 @@ sub new {
     )
 }
 
-1;
 
-package WebService::BART::Exporter::Plugins::Pretty;
-our $VERSION = '0.01';
+1
+__END__
 
-use Modern::Perl;
+=head1 AUTHOR
 
-sub name { "pretty" }
-sub convert {
-    join '', map {
-        sprintf "%s (%s cars) - %s minutes\n",
-                $$_{destination}, $$_{estimate}[0]{length},
-                join ', ', map {$$_{minutes}} @{$$_{estimate}}
-    } @{$$feed{station}{etd}}
-}
+Hike Danakian
 
-1;
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2013 by Hike Danakian
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.14.2 or,
+at your option, any later version of Perl 5 you may have available.
+
+
+=cut
