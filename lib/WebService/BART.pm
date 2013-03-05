@@ -20,52 +20,47 @@ my %validate = (
     station => sub { lc =~ /[a-z0-9]{4}/ ? lc : 'all' },
     date    => sub { lc =~ m(^ \d\d/\d\d/\d{4}|today|now $)x ? lc : () }
 );
-our $BASE_URL = "http://api.bart.gov/api/";
-our $METHODS  = {
-    advisory    => [ '/bsa.aspx'    => {
-        delays      => [{ cmd   => 'bsa',
-                          orig  => [ station => $validate{station} ],
-                        }],
-        trains      => [{ cmd   => 'count' }],
-        elevators   => [{ cmd   => 'elev' }],
+sub url { "http://api.bart.gov/api/" };
+sub methods {
+    departures  => [ '/etd.aspx' => {
+        cmd   => 'etd',
+        orig  => [ station    => $validate{station} ],
+        plat  => [ platform   => qr/^[1-4]$/ ],
+        dir   => [ direction  => qr/^[ns]$/ ],
     }],
-    estimate    => [ '/etd.aspx'    => {
-        departures  => [{ cmd   => 'etd',
-                          orig  => [ station    => $validate{station} ],
-                          plat  => [ platform   => qr/^[1-4]$/ ],
-                          dir   => [ direction  => qr/^[ns]$/ ],
-                        }],
+    route       => [ '/route.aspx' => {
+        cmd   => 'routeinfo',
+        route => [ route_num  => [1..12], 'all' ],
+        sched => [ sched_num  => qr/^\d+$/ ],
+        date  => [ date       => $validate{date} ],
     }],
-    route       => [ '/route.aspx'  => {
-        info        => [{ cmd   => 'routeinfo',
-                          route => [ route_num  => [1..12], 'all' ],
-                          sched => [ sched_num  => qr/^\d+$/ ],
-                          date  => [ date       => $validate{date} ],
-                        }],
-        list        => [{ cmd   => 'routes',
-                          sched => [ sched_num  => qr/^\d+$/ ],
-                          date  => [ date       => $validate{date} ],
-                        }],
+    routes      => [ '/route.aspx' => {
+        cmd   => 'routes',
+        sched => [ sched_num  => qr/^\d+$/ ],
+        date  => [ date       => $validate{date} ],
     }],
-    schedule    => [ '/sched.aspx'  => {
-        arrival     => [{ cmd   => 'arrive' }],
-        departure   => [{ cmd   => 'depart' }],
-        fare        => [{ cmd   => 'fare' }],
-        holiday     => [{ cmd   => 'holiday' }],
-        list        => [{ cmd   => 'scheds' }],
-        special     => [{ cmd   => 'special' }],
-        route       => [{ cmd   => 'routesched' }],
-        station     => [{ cmd   => 'stnsched' }],
+    delays      => [ '/bsa.aspx' => {
+        cmd   => 'bsa',
+        orig  => [ station => $validate{station} ],
     }],
-    station     => [ '/stn.aspx'    => {
-        info        => [{ cmd   => 'stninfo',
-                          orig  => [ station => $validate{station} ],
-                        }],
-        access      => [{ cmd   => 'stnaccess',
-                          orig  => [ station => $validate{station} ],
-                          l     => [ legend  => qr/^[01]$/ ],
-                        }],
-        list        => [{ cmd   => 'stns' }],
+    trains      => [ '/bsa.aspx' => {
+        cmd   => 'count',
+    }],
+    elevators   => [ '/bsa.aspx' => {
+        cmd   => 'elev',
+    }],
+    station     => [ '/stn.aspx' => {
+        cmd   => 'stninfo',
+        orig  => [ station => $validate{station} ],
+    }],
+    stations    => [ '/stn.aspx' => {
+        cmd   => 'stns',
+        orig  => [ station => $validate{station} ],
+    }],
+    access      => [ '/stn.aspx' => {
+        cmd   => 'stnaccess',
+        orig  => [ station => $validate{station} ],
+        l     => [ legend  => qr/^[01]$/ ],
     }],
 };
 
