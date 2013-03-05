@@ -22,42 +22,42 @@ my %validate = (
 );
 sub url { "http://api.bart.gov/api/" };
 sub methods {
-    departures  => [ '/etd.aspx' => {
+    departures  => [ 'etd.aspx' => {
         cmd   => 'etd',
         orig  => [ station    => $validate{station} ],
         plat  => [ platform   => qr/^[1-4]$/ ],
         dir   => [ direction  => qr/^[ns]$/ ],
     }],
-    route       => [ '/route.aspx' => {
+    route       => [ 'route.aspx' => {
         cmd   => 'routeinfo',
         route => [ route_num  => [1..12], 'all' ],
         sched => [ sched_num  => qr/^\d+$/ ],
         date  => [ date       => $validate{date} ],
     }],
-    routes      => [ '/route.aspx' => {
+    routes      => [ 'route.aspx' => {
         cmd   => 'routes',
         sched => [ sched_num  => qr/^\d+$/ ],
         date  => [ date       => $validate{date} ],
     }],
-    delays      => [ '/bsa.aspx' => {
+    delays      => [ 'bsa.aspx' => {
         cmd   => 'bsa',
         orig  => [ station => $validate{station} ],
     }],
-    trains      => [ '/bsa.aspx' => {
+    trains      => [ 'bsa.aspx' => {
         cmd   => 'count',
     }],
-    elevators   => [ '/bsa.aspx' => {
+    elevators   => [ 'bsa.aspx' => {
         cmd   => 'elev',
     }],
-    station     => [ '/stn.aspx' => {
+    station     => [ 'stn.aspx' => {
         cmd   => 'stninfo',
         orig  => [ station => $validate{station} ],
     }],
-    stations    => [ '/stn.aspx' => {
+    stations    => [ 'stn.aspx' => {
         cmd   => 'stns',
         orig  => [ station => $validate{station} ],
     }],
-    access      => [ '/stn.aspx' => {
+    access      => [ 'stn.aspx' => {
         cmd   => 'stnaccess',
         orig  => [ station => $validate{station} ],
         l     => [ legend  => qr/^[01]$/ ],
@@ -85,19 +85,3 @@ sub new {
 
 
 1
-__END__
-
-=head1 AUTHOR
-
-Hike Danakian
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright (C) 2013 by Hike Danakian
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.14.2 or,
-at your option, any later version of Perl 5 you may have available.
-
-
-=cut
