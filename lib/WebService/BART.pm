@@ -75,12 +75,12 @@ sub methods {
 
 sub new {
     my ($class, %config) = @_;
-    unless ($config{key} =~ /^[A-Z0-9-]+$/) {
+    unless (exists $config{key} and $config{key} =~ /^[A-Z0-9-]+$/) {
         $config{key} = 'MW9S-E7SL-26DU-VV8V'
     }
-    $class->SUPER::new(
+    bless $class->SUPER::new(
         key  => $config{key},
-    )
+    ), $class
 }
 
 
