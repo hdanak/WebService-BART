@@ -45,11 +45,14 @@ sub _get {
     $result->is_success ? WebService::Wrapper::Serializer->load_results($result) : ()
 }
 
-sub _create_method {
-    my ($self, $specs) = @_;
+sub _method {
+    my ($self, $name) = @_;
+    my %methods = $self->methods;
+    die "Error: Method '$name' does not exist in ".ref($self).".\n"
+            unless exists $methods{$name};
     sub {
-        my ($self, %user_params) = @_;
-        my ($path, $params) = @$specs;
+        my (%user_params) = @_;
+        my ($path, $params) = @{$methods{$name}};
         $self->_get($path, { map {
             (ref($$params{$_}) ne 'ARRAY') ? (
                 $_ => $$params{$_}
@@ -68,13 +71,7 @@ our $AUTOLOAD;
 sub AUTOLOAD {
     my ($self) = @_;
     my $name = $AUTOLOAD =~ s/.*://r;
-    my %methods = $self->methods;
-    no strict 'refs';
-    if (exists $methods{$name}) {
-        $self->_create_method($methods{$name})->(@_);
-    } else {
-        die "Error: Method '$name' does not exist in ".ref($self).".\n"
-    }
+    $self->_method($name)->(@_)
 }
 
 

@@ -1,8 +1,6 @@
 package WebService::BART;
-use parent qw| WebService::Wrapper |;
-our $VERSION = '0.01';
 
-use Modern::Perl;
+our $VERSION = '0.01';
 
 =head1 NAME
 
@@ -15,55 +13,10 @@ WebService::BART
 
 =cut
 
-
-my %validate = (
-    station => sub { $_[0] ~~ /[a-z0-9]{4}/i },
-    date    => sub { $_[0] ~~ m(^\d\d/\d\d/\d{4}|today|now$)i },
-);
-sub url { "http://api.bart.gov/api/" };
-sub methods {
-    departures  => [ 'etd.aspx' => {
-        cmd   => 'etd',
-        orig  => [ station    => $validate{station} ],
-        plat  => [ platform   => qr/^[1-4]$/ ],
-        dir   => [ direction  => qr/^[ns]$/ ],
-    }],
-    route       => [ 'route.aspx' => {
-        cmd   => 'routeinfo',
-        route => [ route      => [1..12], 'all' ],
-        sched => [ schedule   => qr/^\d+$/ ],
-        date  => [ date       => $validate{date} ],
-    }],
-    routes      => [ 'route.aspx' => {
-        cmd   => 'routes',
-        sched => [ schedule   => qr/^\d+$/ ],
-        date  => [ date       => $validate{date} ],
-    }],
-    delays      => [ 'bsa.aspx' => {
-        cmd   => 'bsa',
-        orig  => [ station => $validate{station} ],
-    }],
-    trains      => [ 'bsa.aspx' => {
-        cmd   => 'count',
-    }],
-    elevators   => [ 'bsa.aspx' => {
-        cmd   => 'elev',
-    }],
-    station     => [ 'stn.aspx' => {
-        cmd   => 'stninfo',
-        orig  => [ station => $validate{station} ],
-    }],
-    stations    => [ 'stn.aspx' => {
-        cmd   => 'stns',
-        orig  => [ station => $validate{station} ],
-    }],
-    access      => [ 'stn.aspx' => {
-        cmd   => 'stnaccess',
-        orig  => [ station => $validate{station} ],
-        l     => [ legend  => qr/^[01]$/ ],
-    }],
-};
-
+use Modern::Perl;
+use WebService::BART::API;
+use AnyEvent;
+use AnyEvent::Strict;
 
 =head1 METHODS
 
@@ -78,9 +31,30 @@ sub new {
     unless (exists $config{key} and $config{key} =~ /^[A-Z0-9-]+$/) {
         $config{key} = 'MW9S-E7SL-26DU-VV8V'
     }
-    bless $class->SUPER::new(
-        key  => $config{key},
-    ), $class
+    my $self = bless {
+        api => WebService::BART::API->new(key => $config{key}),
+    }, $class;
+}
+sub api { shift->{api} }
+
+sub notify_arrivals {
+}
+sub notify_departures {
+}
+sub notify_delays {
+}
+sub notify {
+    my ($self, $method, $args, $action, $interval) = @_;
+    $action   //= sub {};
+    $interval //= 30;
+
+    return AnyEvent->timer(
+        after       => $interval,
+        interval    => $interval,
+        cb          => sub {
+            $action->($self->api->_method($method)->(%$args))
+        },
+    )
 }
 
 
